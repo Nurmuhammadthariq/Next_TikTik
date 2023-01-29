@@ -30,3 +30,10 @@ export interface Video {
     }[];
     useId: string;
 }
+
+export interface IUser {
+    _id: string;
+    _type: string;
+    image: string;
+    username: string;
+}
