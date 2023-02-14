@@ -16,6 +16,7 @@ const Upload = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [videoAsset, setVideoAsset] = useState<SanityAssetDocument | undefined>()
   const [wrongFileType, setWrongFileType] = useState<Boolean>(false)
+  const [savingPost, setSavingPost] = useState<Boolean>(false)
 
   const userProfile: any = useAuthStore((state) => state.userProfile)
   const router = useRouter()
@@ -45,6 +46,34 @@ const Upload = () => {
     } else {
       setIsLoading(false)
       setWrongFileType(true)
+    }
+  }
+
+  const handlePost = async () => {
+    if (caption && videoAsset?._id && topic) {
+      setSavingPost(true)
+
+      const doc = {
+        _type: 'post',
+        caption,
+        video: {
+          _type: 'file',
+          asset: {
+            _type: 'reference',
+            _ref: videoAsset?._id,
+          },
+        },
+        userId: userProfile?._id,
+        postedBy: {
+          _type: 'postedBy',
+          _ref: userProfile?._id,
+        },
+        topic,
+      }
+
+      await axios.post(`${BASE_URL}/api/post`, doc)
+
+      router.push('/')
     }
   }
 
@@ -162,11 +191,13 @@ const Upload = () => {
             >
               Discard
             </button>
-            <button 
+            <button
+              disabled={videoAsset?.url ? false : true}
+              onClick={handlePost}
               type='button' 
               className='bg-[#F51997] text-white text-md font-medium p-2 rounded w-28 lg:w-44 outline-none'
             >
-              Post
+              {savingPost ? 'Posting...' : 'Post'}
             </button>
           </div>
         </div>
